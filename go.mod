@@ -1,0 +1,12 @@
+module github.com/AbolfazlAkhtari/weather-forecast
+
+go 1.24.6
+
+require (
+	github.com/caarlos0/env/v11 v11.3.1 // indirect
+	github.com/go-errors/errors v1.5.1 // indirect
+	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/jinzhu/now v1.1.5 // indirect
+	golang.org/x/text v0.28.0 // indirect
+	gorm.io/gorm v1.30.2 // indirect
+)
