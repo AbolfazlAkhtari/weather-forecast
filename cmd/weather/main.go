@@ -3,7 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/AbolfazlAkhtari/weather-forecast/configs/db"
-	"github.com/AbolfazlAkhtari/weather-forecast/configs/weather"
+	weatherCfg "github.com/AbolfazlAkhtari/weather-forecast/configs/weather"
+	"github.com/AbolfazlAkhtari/weather-forecast/internal/app/weather"
 	"github.com/AbolfazlAkhtari/weather-forecast/pkg/exception"
 	"github.com/AbolfazlAkhtari/weather-forecast/pkg/gorm"
 	"github.com/AbolfazlAkhtari/weather-forecast/pkg/middleware"
@@ -25,13 +26,10 @@ func main() {
 	httpRouter := chi.NewRouter()
 	httpRouter.Use(chiMiddleware.Logger)
 	httpRouter.Use(middleware.SetResponseHeader)
-	httpRouter.Use(func(handler http.Handler) http.Handler {
-		return middleware.SetDB(handler, database)
-	})
 
-	//auth.Controller{ChiRouter: httpRouter}.InitRoutes()
+	weather.NewController(database).InitRoutes()
 
-	config := weather.LoadFromEnv()
+	config := weatherCfg.LoadFromEnv()
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", config.PORT), httpRouter))
 }
