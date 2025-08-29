@@ -1,0 +1,23 @@
+name: infra
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: weather_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      TZ: Asia/Tehran
+    ports:
+      - "${DB_PORT}:5432"
+    networks:
+      - infra_network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
+networks:
+  infra_network:
