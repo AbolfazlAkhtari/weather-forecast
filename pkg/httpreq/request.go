@@ -47,7 +47,7 @@ func parse(w http.ResponseWriter, r *http.Request, input any) error {
 func validate(w http.ResponseWriter, input any) (err error) {
 	validationErrors := validation.ValidateData(input)
 	if validationErrors != nil {
-		httpres.SendResponse(w, http.StatusBadRequest, validationErrors, nil)
+		httpres.SendResponse(w, http.StatusUnprocessableEntity, validationErrors, nil)
 		return errors.New("validation_failed")
 	}
 
