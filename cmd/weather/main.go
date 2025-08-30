@@ -6,7 +6,6 @@ import (
 	weatherCfg "github.com/AbolfazlAkhtari/weather-forecast/configs/weather"
 	"github.com/AbolfazlAkhtari/weather-forecast/internal/app/weather"
 	"github.com/AbolfazlAkhtari/weather-forecast/pkg/exception"
-	"github.com/AbolfazlAkhtari/weather-forecast/pkg/gorm"
 	"github.com/AbolfazlAkhtari/weather-forecast/pkg/middleware"
 	"github.com/go-chi/chi/v5"
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
@@ -21,15 +20,20 @@ func main() {
 		}
 	}()
 
-	database := gorm.InitializeGorm(db.Postgres{})
+	database, err := db.Postgres{}.Open(true)
+	if err != nil {
+		exception.ReportException(err)
+		return
+	}
 
 	httpRouter := chi.NewRouter()
 	httpRouter.Use(chiMiddleware.Logger)
 	httpRouter.Use(middleware.SetResponseHeader)
 
-	weather.NewController(database).InitRoutes()
+	weather.NewController(database, httpRouter).InitRoutes()
 
 	config := weatherCfg.LoadFromEnv()
 
+	fmt.Printf("App Served on port %v \n\n", config.PORT)
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", config.PORT), httpRouter))
 }

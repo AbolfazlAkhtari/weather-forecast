@@ -1,8 +1,8 @@
 package db
 
 import (
-	"fmt"
 	"github.com/caarlos0/env/v11"
+	"github.com/pressly/goose/v3"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
@@ -11,13 +11,7 @@ import (
 type Postgres struct{}
 
 type PgConfig struct {
-	HOST     string `env:"DB_HOST"`
-	PORT     string `env:"DB_PORT"`
-	DATABASE string `env:"DB_DATABASE"`
-	USER     string `env:"DB_USER"`
-	PASSWORD string `env:"DB_PASSWORD"`
-	SSLMODE  string `env:"DB_SSLMODE" envDefault:"disable"`
-	TZ       string `env:"DB_TZ" envDefault:"UTC"`
+	URL string `env:"DB_URL"`
 }
 
 func (Postgres) dsn() string {
@@ -26,19 +20,30 @@ func (Postgres) dsn() string {
 		log.Fatal("Error parsing postgres config:", err)
 	}
 
-	// postgres://user:password@host:port/dbname?sslmode=disable&TimeZone=UTC
-	return fmt.Sprintf(
-		"postgres://%v:%v@%v:%v/%v?sslmode=%v&TimeZone=%v",
-		cfg.USER,
-		cfg.PASSWORD,
-		cfg.HOST,
-		cfg.PORT,
-		cfg.DATABASE,
-		cfg.SSLMODE,
-		cfg.TZ,
-	)
+	return cfg.URL
 }
 
-func (db Postgres) Open() gorm.Dialector {
-	return postgres.Open(db.dsn())
+func (db Postgres) Open(migrate bool) (*gorm.DB, error) {
+	dsn := db.dsn()
+
+	gormDB, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		return nil, err
+	}
+
+	if migrate {
+		doMigrate(gormDB)
+	}
+
+	return gormDB, nil
+}
+
+func doMigrate(gormDB *gorm.DB) {
+	if sqlDB, err := gormDB.DB(); err != nil {
+		log.Println("could not get db from gormDB in db.Open -> migrate")
+	} else {
+		if err := goose.Up(sqlDB, "./migrations"); err != nil {
+			log.Println("could not close database in db.Migrate")
+		}
+	}
 }
