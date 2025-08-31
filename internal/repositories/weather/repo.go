@@ -23,6 +23,10 @@ func (r Repository) Create(ctx context.Context, w *models.Weather) error {
 	return r.db.WithContext(ctx).Create(w).Error
 }
 
+func (r Repository) Update(ctx context.Context, id uuid.UUID, input map[string]interface{}) error {
+	return r.db.WithContext(ctx).Model(&models.Weather{}).Where("id = ?", id).Updates(input).Error
+}
+
 func (r Repository) PaginatedList(ctx context.Context, page int) (weathers []models.Weather, totalPage, count int64, err error) {
 	offset := (page - 1) * schemata.PaginationLimit
 

@@ -9,6 +9,7 @@ import (
 	weatherApiConf "github.com/AbolfazlAkhtari/weather-forecast/pkg/weather_api/conf"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"time"
 )
 
 type Service struct {
@@ -85,4 +86,26 @@ func (s Service) fetchData(ctx context.Context, input FetchDataInput) (*models.W
 	}
 
 	return &w, nil
+}
+
+func (s Service) update(ctx context.Context, id uuid.UUID, input UpdateInput) (*models.Weather, error) {
+	now := time.Now()
+	input.UpdatedAt = &now
+
+	repoInput, err := mapUpdateInputToRepoInput(input)
+	if err != nil {
+		return nil, err
+	}
+
+	err = s.repository.Update(ctx, id, repoInput)
+	if err != nil {
+		return nil, err
+	}
+
+	w, err := s.findById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	return w, nil
 }

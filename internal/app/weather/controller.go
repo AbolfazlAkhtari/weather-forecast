@@ -31,7 +31,7 @@ func (c Controller) InitRoutes() {
 		router.Get("/weather/latest/{city_name}", c.getByCityName)
 		router.Get("/weather/{id}", c.getById)
 		router.Post("/weather", c.fetchData)
-		router.Put("/weather/{id}", nil)
+		router.Put("/weather/{id}", c.update)
 		router.Delete("/weather/{id}", c.deleteById)
 	})
 }
@@ -118,6 +118,26 @@ func (c Controller) fetchData(w http.ResponseWriter, r *http.Request) {
 	}
 
 	httpres.SendResponse(w, http.StatusCreated, output, nil)
+}
+
+func (c Controller) update(w http.ResponseWriter, r *http.Request) {
+	id := url.GetUUIDFromParam(r, w, "id")
+	if id == nil {
+		return
+	}
+
+	input := httpreq.ParseAndValidateInput[UpdateInput](w, r)
+	if input == nil {
+		return
+	}
+
+	output, err := c.service.update(r.Context(), *id, *input)
+	if err != nil {
+		handleServiceErrors(w, err)
+		return
+	}
+
+	httpres.SendResponse(w, http.StatusOK, output, nil)
 }
 
 func handleServiceErrors(w http.ResponseWriter, err error) {
