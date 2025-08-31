@@ -6,6 +6,7 @@ import (
 	"github.com/AbolfazlAkhtari/weather-forecast/internal/repositories/weather"
 	"github.com/AbolfazlAkhtari/weather-forecast/pkg/weather_api"
 	weatherApiConf "github.com/AbolfazlAkhtari/weather-forecast/pkg/weather_api/conf"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -23,6 +24,15 @@ func NewService(db *gorm.DB) Service {
 
 func (s Service) latestByCityName(ctx context.Context, cityName string) (*models.Weather, error) {
 	w, err := s.repository.LatestByCityName(ctx, cityName)
+	if err != nil {
+		return nil, err
+	}
+
+	return w, nil
+}
+
+func (s Service) findById(ctx context.Context, id uuid.UUID) (*models.Weather, error) {
+	w, err := s.repository.FindById(ctx, id)
 	if err != nil {
 		return nil, err
 	}
