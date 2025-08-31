@@ -31,11 +31,9 @@ func (c Controller) InitRoutes() {
 		router.Get("/weather/{id}", c.getById)
 		router.Post("/weather", c.fetchData)
 		router.Put("/weather/{id}", nil)
-		router.Delete("/weather/{id}", nil)
+		router.Delete("/weather/{id}", c.deleteById)
 	})
 }
-
-// todo: refactor error http status mappings
 
 func (c Controller) getByCityName(w http.ResponseWriter, r *http.Request) {
 	cityName := url.GetStringFromParam(r, w, "city_name")
@@ -45,10 +43,7 @@ func (c Controller) getByCityName(w http.ResponseWriter, r *http.Request) {
 
 	output, err := c.service.latestByCityName(r.Context(), *cityName)
 	if err != nil {
-		status := httpErr.MapErrorToHttpStatusCode(err)
-
-		msg := err.Error()
-		httpres.SendResponse(w, status, nil, &msg)
+		handleServiceErrors(w, err)
 		return
 	}
 
@@ -63,14 +58,26 @@ func (c Controller) getById(w http.ResponseWriter, r *http.Request) {
 
 	output, err := c.service.findById(r.Context(), *id)
 	if err != nil {
-		status := httpErr.MapErrorToHttpStatusCode(err)
-
-		msg := err.Error()
-		httpres.SendResponse(w, status, nil, &msg)
+		handleServiceErrors(w, err)
 		return
 	}
 
 	httpres.SendResponse(w, http.StatusOK, output, nil)
+}
+
+func (c Controller) deleteById(w http.ResponseWriter, r *http.Request) {
+	id := url.GetUUIDFromParam(r, w, "id")
+	if id == nil {
+		return
+	}
+
+	err := c.service.deleteById(r.Context(), *id)
+	if err != nil {
+		handleServiceErrors(w, err)
+		return
+	}
+
+	httpres.SendResponse(w, http.StatusOK, nil, nil)
 }
 
 func (c Controller) fetchData(w http.ResponseWriter, r *http.Request) {
@@ -81,12 +88,16 @@ func (c Controller) fetchData(w http.ResponseWriter, r *http.Request) {
 
 	output, err := c.service.fetchData(r.Context(), *input)
 	if err != nil {
-		status := httpErr.MapErrorToHttpStatusCode(err)
-
-		msg := err.Error()
-		httpres.SendResponse(w, status, nil, &msg)
+		handleServiceErrors(w, err)
 		return
 	}
 
 	httpres.SendResponse(w, http.StatusCreated, output, nil)
+}
+
+func handleServiceErrors(w http.ResponseWriter, err error) {
+	status := httpErr.MapErrorToHttpStatusCode(err)
+
+	msg := err.Error()
+	httpres.SendResponse(w, status, nil, &msg)
 }

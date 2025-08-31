@@ -40,6 +40,10 @@ func (s Service) findById(ctx context.Context, id uuid.UUID) (*models.Weather, e
 	return w, nil
 }
 
+func (s Service) deleteById(ctx context.Context, id uuid.UUID) error {
+	return s.repository.DeleteById(ctx, id)
+}
+
 func (s Service) fetchData(ctx context.Context, input FetchDataInput) (*models.Weather, error) {
 	fetchWeatherFunc, err := weather_api.LoadFetchWeatherByLocationFunc(weather_api.OpenWeather)
 	if err != nil {

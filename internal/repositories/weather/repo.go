@@ -32,3 +32,7 @@ func (r Repository) FindById(ctx context.Context, id uuid.UUID) (w *models.Weath
 
 	return w, err
 }
+
+func (r Repository) DeleteById(ctx context.Context, id uuid.UUID) error {
+	return r.db.WithContext(ctx).Delete(models.Weather{}, id).Error
+}
