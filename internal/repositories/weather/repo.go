@@ -3,8 +3,10 @@ package weather
 import (
 	"context"
 	"github.com/AbolfazlAkhtari/weather-forecast/internal/models"
+	"github.com/AbolfazlAkhtari/weather-forecast/internal/schemata"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"math"
 )
 
 type Repository struct {
@@ -19,6 +21,19 @@ func NewRepository(db *gorm.DB) Repository {
 
 func (r Repository) Create(ctx context.Context, w *models.Weather) error {
 	return r.db.WithContext(ctx).Create(w).Error
+}
+
+func (r Repository) PaginatedList(ctx context.Context, page int) (weathers []models.Weather, totalPage, count int64, err error) {
+	offset := (page - 1) * schemata.PaginationLimit
+
+	query := r.db.WithContext(ctx).Model(models.Weather{})
+
+	query.Count(&count)
+
+	result := query.Order("created_at desc").Offset(offset).Limit(schemata.PaginationLimit).Find(&weathers)
+	totalPage = int64(math.Ceil(float64(count) / float64(schemata.PaginationLimit)))
+
+	return weathers, totalPage, count, result.Error
 }
 
 func (r Repository) LatestByCityName(ctx context.Context, cityName string) (w *models.Weather, err error) {

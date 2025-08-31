@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/AbolfazlAkhtari/weather-forecast/internal/models"
 	"github.com/AbolfazlAkhtari/weather-forecast/internal/repositories/weather"
+	"github.com/AbolfazlAkhtari/weather-forecast/internal/schemata"
 	"github.com/AbolfazlAkhtari/weather-forecast/pkg/weather_api"
 	weatherApiConf "github.com/AbolfazlAkhtari/weather-forecast/pkg/weather_api/conf"
 	"github.com/google/uuid"
@@ -20,6 +21,26 @@ func NewService(db *gorm.DB) Service {
 		db:         db,
 		repository: weather.NewRepository(db),
 	}
+}
+
+func (s Service) paginatedList(ctx context.Context, page int) (*ListOutput, error) {
+	if page == 0 {
+		page = 1
+	}
+
+	weathers, totalPage, count, err := s.repository.PaginatedList(ctx, page)
+	if err != nil {
+		return nil, err
+	}
+
+	return &ListOutput{
+		Weathers: weathers,
+		Pagination: schemata.Pagination{
+			TotalPage:   totalPage,
+			TotalCount:  count,
+			CurrentPage: page,
+		},
+	}, nil
 }
 
 func (s Service) latestByCityName(ctx context.Context, cityName string) (*models.Weather, error) {

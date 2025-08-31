@@ -8,6 +8,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"gorm.io/gorm"
 	"net/http"
+	"strconv"
 )
 
 type Controller struct {
@@ -26,13 +27,37 @@ func NewController(db *gorm.DB, router *chi.Mux) Controller {
 
 func (c Controller) InitRoutes() {
 	c.router.Group(func(router chi.Router) {
-		router.Get("/weather", nil)
+		router.Get("/weather", c.paginatedList)
 		router.Get("/weather/latest/{city_name}", c.getByCityName)
 		router.Get("/weather/{id}", c.getById)
 		router.Post("/weather", c.fetchData)
 		router.Put("/weather/{id}", nil)
 		router.Delete("/weather/{id}", c.deleteById)
 	})
+}
+
+func (c Controller) paginatedList(w http.ResponseWriter, r *http.Request) {
+	page := 1
+
+	pageInput := r.URL.Query().Get("page")
+	if pageInput != "" {
+		var err error
+		page, err = strconv.Atoi(pageInput)
+
+		if err != nil {
+			msg := err.Error()
+			httpres.SendResponse(w, http.StatusBadRequest, nil, &msg)
+			return
+		}
+	}
+
+	output, err := c.service.paginatedList(r.Context(), page)
+	if err != nil {
+		handleServiceErrors(w, err)
+		return
+	}
+
+	httpres.SendResponse(w, http.StatusOK, output, nil)
 }
 
 func (c Controller) getByCityName(w http.ResponseWriter, r *http.Request) {
