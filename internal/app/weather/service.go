@@ -21,6 +21,15 @@ func NewService(db *gorm.DB) Service {
 	}
 }
 
+func (s Service) latestByCityName(ctx context.Context, cityName string) (*models.Weather, error) {
+	w, err := s.repository.LatestByCityName(ctx, cityName)
+	if err != nil {
+		return nil, err
+	}
+
+	return w, nil
+}
+
 func (s Service) fetchData(ctx context.Context, input FetchDataInput) (*models.Weather, error) {
 	fetchWeatherFunc, err := weather_api.LoadFetchWeatherByLocationFunc(weather_api.OpenWeather)
 	if err != nil {
@@ -33,12 +42,12 @@ func (s Service) fetchData(ctx context.Context, input FetchDataInput) (*models.W
 		return nil, err
 	}
 
-	weatherModel := mapFetchWeatherResponseToWeatherModel(*fetchWeatherResponse)
+	w := mapFetchWeatherResponseToWeatherModel(*fetchWeatherResponse)
 
-	err = s.repository.CreateWeather(ctx, &weatherModel)
+	err = s.repository.Create(ctx, &w)
 	if err != nil {
 		return nil, err
 	}
 
-	return &weatherModel, nil
+	return &w, nil
 }
