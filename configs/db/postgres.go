@@ -43,7 +43,7 @@ func doMigrate(gormDB *gorm.DB) {
 		log.Println("could not get db from gormDB in db.Open -> migrate")
 	} else {
 		if err := goose.Up(sqlDB, "./migrations"); err != nil {
-			log.Println("could not close database in db.Migrate")
+			log.Println("error in migrating", err)
 		}
 	}
 }

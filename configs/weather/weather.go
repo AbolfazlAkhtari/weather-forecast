@@ -6,7 +6,8 @@ import (
 )
 
 type Config struct {
-	PORT string `env:"WEATHER_PORT"`
+	Port          string `env:"WEATHER_PORT"`
+	AllowedOrigin string `env:"ALLOWED_ORIGIN"`
 }
 
 func LoadFromEnv() Config {

@@ -1,0 +1,13 @@
+name: weather
+
+services:
+  swagger-ui:
+    image: swaggerapi/swagger-ui
+    container_name: swagger-ui
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./swagger.json:/usr/share/nginx/html/swagger.json:ro
+    # Add this environment section
+    environment:
+      - URL=/swagger.json

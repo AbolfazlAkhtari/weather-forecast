@@ -2,8 +2,9 @@ name: infra
 
 services:
   postgres:
-    image: postgres:15
+    image: postgres:17-alpine
     container_name: weather_postgres
+    hostname: postgres
     restart: always
     environment:
       POSTGRES_DB: ${DB_DATABASE}
@@ -13,11 +14,13 @@ services:
     ports:
       - "${DB_PORT}:5432"
     networks:
-      - infra_network
+      - weather_network
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
 volumes:
   postgres_data:
 networks:
-  infra_network:
+  weather_network:
+    name: weather_network
+    external: true

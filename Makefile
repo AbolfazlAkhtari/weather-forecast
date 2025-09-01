@@ -9,6 +9,9 @@ weather-run:
 weather-build:
 	@bash scripts/weather/build.sh
 
+weather-docs:
+	@bash scripts/weather/docs.sh
+
 migrate-create:
 ifndef name
 	$(error Please specify name, like: make migrate-create name=users)

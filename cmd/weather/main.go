@@ -9,6 +9,7 @@ import (
 	"github.com/AbolfazlAkhtari/weather-forecast/pkg/middleware"
 	"github.com/go-chi/chi/v5"
 	chiMiddleware "github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	"log"
 	"net/http"
 )
@@ -26,14 +27,22 @@ func main() {
 		return
 	}
 
+	config := weatherCfg.LoadFromEnv()
+
 	httpRouter := chi.NewRouter()
 	httpRouter.Use(chiMiddleware.Logger)
 	httpRouter.Use(middleware.SetResponseHeader)
 
+	httpRouter.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{config.AllowedOrigin},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{},
+		AllowCredentials: true,
+	}))
+
 	weather.NewController(database, httpRouter).InitRoutes()
 
-	config := weatherCfg.LoadFromEnv()
-
-	fmt.Printf("App Served on port %v \n\n", config.PORT)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", config.PORT), httpRouter))
+	fmt.Printf("App Served on port %v \n\n", config.Port)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", config.Port), httpRouter))
 }
