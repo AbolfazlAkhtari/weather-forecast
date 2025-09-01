@@ -18,7 +18,7 @@ type UpdateInput struct {
 	Description *string    `json:"description,omitempty" validate:"omitempty,max=200"`
 	Humidity    *int       `json:"humidity,omitempty" validate:"omitempty,gte=0,lte=100"`
 	WindSpeed   *float64   `json:"wind_speed,omitempty" validate:"omitempty,gte=0"`
-	UpdatedAt   *time.Time `json:"updated_at"`
+	UpdatedAt   *time.Time `json:"updated_at,omitempty"`
 }
 
 type ListInput struct {

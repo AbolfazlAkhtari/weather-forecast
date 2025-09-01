@@ -5,11 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/AbolfazlAkhtari/weather-forecast/pkg/weather_api/conf"
-	"github.com/AbolfazlAkhtari/weather-forecast/pkg/weather_api/schemata"
 	"io"
 	"log"
 	"net/http"
+
+	"github.com/AbolfazlAkhtari/weather-forecast/pkg/weather_api/conf"
+	"github.com/AbolfazlAkhtari/weather-forecast/pkg/weather_api/schemata"
 )
 
 const baseURL = "https://api.openweathermap.org/data/2.5/weather"
